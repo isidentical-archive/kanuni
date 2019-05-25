@@ -217,6 +217,7 @@ class Controller(arcade.Window):
             Key.D: ("x", self.player.features.speed),
             Key.A: ("x", -self.player.features.speed),
             Key.G: ("evolve", self.player.points),
+            Key.R: ("restart", None),
         }
         if self.pending_task:
             task, *args = self.pending_task
@@ -268,6 +269,17 @@ class Controller(arcade.Window):
                 self.player.level += 1
                 self.player.points -= action
                 self.player.obtain_new_feature()
+        
+        elif utype == "restart":
+            self.player = Player()
+            self.grid = Grid(**CONFIG["tiles"])
+            self.herb_foods = 0
+            self.carn_foods = 0
+
+            
+            self.pending_task = None
+            self.event = None
+            self.event_timer = 0
 
 
 def main():
