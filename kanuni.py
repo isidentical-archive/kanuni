@@ -208,12 +208,10 @@ class Controller(arcade.Window):
         self.draw_grid()
     
     def on_draw(self):
-        t0 = time.time()
         arcade.start_render()
         self.draw_player()
         self.shape_list.draw()
-        t1 = time.time()
-        print(t1-t0)
+
     def on_key_release(self, key, *args):
         self.draw_player(0)
         actions = {
@@ -221,7 +219,7 @@ class Controller(arcade.Window):
             Key.S: ("y", -self.player.features.speed),
             Key.D: ("x", self.player.features.speed),
             Key.A: ("x", -self.player.features.speed),
-            Key.G: ("evolve", self.player.points),
+            Key.G: ("evolve", self.player.required_points),
             Key.R: ("restart", None),
         }
         if self.pending_task:
@@ -269,7 +267,7 @@ class Controller(arcade.Window):
             setattr(self, attr, getattr(self, attr) - 1)
 
         elif utype == "evolve":
-            if action >= self.player.required_points:
+            if self.player.points >= self.player.required_points:
                 self.player.level += 1
                 self.player.points -= action
                 self.player.obtain_new_feature()
