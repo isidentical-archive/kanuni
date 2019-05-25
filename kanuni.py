@@ -6,11 +6,13 @@ from enum import Enum
 from itertools import repeat
 from random import choice, randrange
 from typing import Sequence
+from functools import lru_cache
 
 import arcade
 from arcade import color as Color
 from arcade import key as Key
 
+arcade.create_rectangle_filled = lru_cache(None)(arcade.create_rectangle_filled)
 CONFIG = {
     "tiles": {"sep": 5, "row": 20, "col": 20, "width": 30, "height": 30},
     "window": {"title": "Kanuni", "padding": 150},
@@ -108,12 +110,14 @@ class Player:
 class Grid(UserList):
     def __init__(self, row, col, **kwargs):
         self.data = [list(repeat(0, col)).copy() for _ in range(row)]
+        self._buffer = self.data.copy()
 
     def set_block(self, col, row, value):
         self.data[row][col] = value
 
     def get_block(self, col, row):
         return self.data[row][col]
+    
 
 
 class Controller(arcade.Window):
@@ -200,15 +204,16 @@ class Controller(arcade.Window):
         for cell in self.player.cells:
             self.grid.set_block(cell.x, cell.y, value)
         self.draw_foods()
-        self.draw_grid()
         self.draw_info()
-
+        self.draw_grid()
+    
     def on_draw(self):
+        t0 = time.time()
         arcade.start_render()
         self.draw_player()
         self.shape_list.draw()
-        print(self.player)
-
+        t1 = time.time()
+        print(t1-t0)
     def on_key_release(self, key, *args):
         self.draw_player(0)
         actions = {
@@ -236,7 +241,6 @@ class Controller(arcade.Window):
                         self.update_player(direction, amount)
                         return
 
-                    print(current)
                     self.update_player("tile", current, x, y)
                     cell.update_coords(direction, amount)
 
